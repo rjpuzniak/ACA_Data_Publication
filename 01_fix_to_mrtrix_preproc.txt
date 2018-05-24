@@ -1,0 +1,52 @@
+### Covering all possible combinations to be expected by dwipreproc. RPE_HEADER seems like a natural choice for current data usage and structure, but this step will always require verification, therefore explicit versions are safer.
+
+## raw inputs (optional pair of images with different PE directions)
+PAIRS=`jq -r '.pairs' config.json`
+
+## switches
+## acquisition phase-encoding design: none (no reversed PE), pair (single pair of images with reversed PE direction, typically b0), all (whole series acquired with two PE directions), header (PE information is stored in header and this will be the information to be used) 
+RPE=`jq -r '.rpe' config.json`
+
+
+rpe_pair= ?????????????????
+
+## perform eddy correction with FSL
+if [ $DO_EDDY == "true" ]; then
+
+
+    if [ $RPE == "none" ]; then
+    
+      echo "Performing FSL eddy correction..."
+      dwipreproc -rpe_none -pe_dir $ACQD ${difm}.mif ${difm}_eddy.mif -cuda -tempdir ./tmp -nthreads $NCORE -quiet
+      difm=${difm}_eddy
+	
+    fi
+
+    if [ $RPE == "pairs" ]; then
+    
+      echo "Performing FSL eddy correction providing pair(s) of images with dual PE directions in order to correct DW series with single PE direction..."
+      dwipreproc -rpe_pair ${rpe_pair}.mif -pe_dir $ACQD ${difm}.mif ${difm}_eddy.mif -cuda -tempdir ./tmp -nthreads $NCORE -quiet
+      difm=${difm}_eddy
+	
+    fi
+    
+    
+    if [ $RPE == "all" ]; then
+    
+	echo "Performing FSL eddy correction for combined series of DW images with dual PE directions..."
+	dwipreproc -rpe_all -pe_dir $ACQD ${difm}.mif ${difm}_eddy.mif -cuda -tempdir ./tmp -nthreads $NCORE -quiet
+	difm=${difm}_eddy
+	
+    fi
+
+    
+    if [ $RPE == "header" ]; then
+    
+	echo "Performing FSL eddy correction for combined series of DW images with dual PE directions..."
+	dwipreproc -rpe_header ${difm}.mif ${difm}_eddy.mif -cuda -tempdir ./tmp -nthreads $NCORE -quiet
+	difm=${difm}_eddy
+	
+    fi
+
+
+fi
