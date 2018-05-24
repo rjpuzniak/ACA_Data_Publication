@@ -1,4 +1,6 @@
 Scripts
+-----------------------------------------------------------------------------------------------
+DONE
 
 01_fix_to_mrtrix_preproc
 
@@ -9,19 +11,22 @@ Scripts
 
 app_5ttgen
 
-	- wrapper for 5ttgen script from mrtrix
+	- wrapper for 5ttgen script from mrtrix, uses either FSL or FREESURFER
+-----------------------------------------------------------------------------------------------
+IN PROGRESS
 
-Preprocessing
-  - requires modification of brents script, apart from that we are good
-  
-ACPC_registration
-  - also uses existing function
+app_postproc
+
+	- based on CSD
+	- setup for Ensemble Tractography
+-----------------------------------------------------------------------------------------------
+TO BE DONE
+
+
   
 Postprocessing_mrtrix
   - new function, requires ACPC output
-  
-5TT_gen
-  - new function
+
   
 Tracking_mrtrix_ROIs
   - new function, requires ROIs
