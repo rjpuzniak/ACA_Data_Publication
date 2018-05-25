@@ -1,0 +1,11 @@
+{
+   "dwi": "/home/auguser2016/Projects/0000_Chiasm/nb30/nb30_150mm_clean_aligned_trilin_noMEC.nii.gz ",	   
+   "gtab": "/home/auguser2016/Projects/0000_Chiasm/nb30/nb30_150mm_clean_aligned_trilin_noMEC.bvecs /home/auguser2016/Projects/0000_Chiasm/nb30/nb30_150mm_clean_aligned_trilin_noMEC.bvals",
+   "response_algorithm": "tournier",
+   "response_lmax": 6,
+   "dwi2fod_algorithm": "msmt_csd",
+   "dwi2fod_lmax_range": "6 8 10",
+   "shell": 1600
+}
+
+

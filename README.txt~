@@ -9,26 +9,22 @@ DONE
 	- optional argument: pair(s) of images with different PE directions
 
 
-app-5ttgen
+app_5ttgen
 
 	- wrapper for 5ttgen script from mrtrix, uses either FSL or FREESURFER
-	
-app-ACA_data_postproc
-
-	- based on CSD
-	- setup for Ensemble Tractography
 -----------------------------------------------------------------------------------------------
 IN PROGRESS
 
-app-merge_files
+app_postproc
 
-app-ROI2ROI_tracking
-
+	- based on CSD
+	- setup for Ensemble Tractography
 
 -----------------------------------------------------------------------------------------------
 TO BE DONE
 
 Merging script
+
   - allows merging of dwi images
   
 Tracking_mrtrix_ROIs
@@ -40,5 +36,19 @@ Results_presentation
   
   
 *
+mrtrix_preprocessing solved
+ROIs handling required
+  
+  
 
+ACPC registration
+Postprocessing
+Tracking
+
+
+
+
+Files
+
+Raw -Preprocessing-> Preprocessed
 
