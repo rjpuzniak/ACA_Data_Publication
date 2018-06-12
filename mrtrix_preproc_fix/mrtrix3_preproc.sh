@@ -82,39 +82,14 @@ dwi2mask raw.mif ${mask}.mif -force -nthreads $NCORE -quiet
 
 ##################################################################################################################### HERE APPLY PREEDDY FUNCTION TO ALL POSSIBLE EDDY INPUT
 
-source mrtrix_preeddy.sh raw.mif
+source mrtrix3_preeddy.sh raw.mif result
+difm=${result}
+
 
 ${difm}
 ${rpe_pair}
 ${difm} $all
 
-
-
-echo "Identifying correct gradient orientation..."
-
-## check and correct gradient orientation
-dwigradcheck raw.mif -grad raw.b -mask ${mask}.mif -export_grad_mrtrix corr.b -force -tempdir ./tmp -nthreads $NCORE -quiet
-
-## create corrected image
-mrconvert raw.mif -grad corr.b ${difm}.mif -nthreads $NCORE -quiet
-
-## perform PCA denoising
-if [ $DO_DENOISE == "true" ]; then
-
-    echo "Performing PCA denoising..."
-    dwidenoise ${difm}.mif ${difm}_denoise.mif -nthreads $NCORE -quiet
-    difm=${difm}_denoise
-    
-fi
-
-## if scanner artifact is found
-if [ $DO_DEGIBBS == "true" ]; then
-
-    echo "Performing Gibbs ringing correction..."
-    mrdegibbs ${difm}.mif ${difm}_degibbs.mif -nthreads $NCORE -quiet
-    difm=${difm}_degibbs
-    
-fi
    
 ## perform eddy correction with FSL
 if [ $DO_EDDY == "true" ]; then
@@ -128,6 +103,9 @@ if [ $DO_EDDY == "true" ]; then
     	fi
 
 	if [ $RPE == "pairs" ]; then
+
+	      source mrtrix3_preeddy.sh ${rpe_pair}.mif result
+	      rpe_pair=${result}
 	    
 	      echo "Performing FSL eddy correction providing pair(s) of images with dual PE directions in order to correct DW series with single PE direction..."
 	      dwipreproc -rpe_pair ${rpe_pair}.mif -pe_dir $ACQD ${difm}.mif ${difm}_eddy.mif -cuda -tempdir ./tmp -nthreads $NCORE -quiet
@@ -136,9 +114,15 @@ if [ $DO_EDDY == "true" ]; then
 	fi
 
     	if [ $RPE == "all" ]; then
+
+	      mrconvert -fslgrad $BVEC2 $BVAL2 $DIFF2 raw2.mif -nthreads $NCORE -quiet
+	      source mrtrix3_preeddy.sh raw2.mif result2
+	      difm2=${result2}
+
+	      mrcat ${difm} ${difm2} difm_all
     
 		echo "Performing FSL eddy correction for combined series of DW images with dual PE directions..."
-		dwipreproc -rpe_all -pe_dir $ACQD ${difm}.mif ${difm}_eddy.mif -cuda -tempdir ./tmp -nthreads $NCORE -quiet
+		dwipreproc -rpe_all -pe_dir $ACQD ${difm_all}.mif ${difm}_eddy.mif -cuda -tempdir ./tmp -nthreads $NCORE -quiet
 		difm=${difm}_eddy
 	
     	fi

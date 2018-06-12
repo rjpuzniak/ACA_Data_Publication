@@ -1,1 +1,0 @@
-Performs five-tissue-type segmentation (5TT; specifically into WM matter, GM matter, sub-cortical GM, CSF and potential pathological tissue). Requires choice of algorithm: FSL or FREESURFER
