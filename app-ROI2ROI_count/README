@@ -1,0 +1,5 @@
+Input:
+1) Bundle of fibers to be segmented into several bundles according to ROIs
+
+Output:
+a) Count of fibers per separated bundles

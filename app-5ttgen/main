@@ -1,0 +1,46 @@
+#!/bin/bash
+
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=00:05:00
+
+# Data
+t1=$(jq -r .t1 config.json)
+
+# Switches
+algorithm=$(jq -r .alg config.json)
+nocrop=$(jq -r .nocrop config.json)
+sgm_amy_hip=$(jq -r .sgm_amy_hip config.json)
+
+echo "Performing 5TT image generation..."
+
+
+if [ $nocrop == "true" ]; then
+
+	if [ $sgm_amy_hip == "true" ]; then
+
+		5ttgen $algorithm ${t1} -nocrop -sgm_amyg_hipp output.mif
+
+	else
+
+		5ttgen $algorithm ${t1} -nocrop output.mif
+
+	fi
+
+else
+
+	if [ $sgm_amy_hip == "true" ]; then
+
+		5ttgen $algorithm ${t1} -sgm_amyg_hipp output.mif
+
+	else
+
+		5ttgen $algorithm ${t1} output.mif
+
+	fi
+
+fi
+
+echo $algorithm 
+echo ${t1}.mif
+echo $sgm_amyg_hipp 
+echo $nocrop

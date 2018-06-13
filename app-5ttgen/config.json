@@ -1,0 +1,6 @@
+{
+   "t1": "../../data/t1.nii.gz",
+   "alg": "fsl"	,
+   "nocrop": "false",
+   "sgm_amy_hip": "false"	
+}

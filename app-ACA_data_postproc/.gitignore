@@ -1,0 +1,6 @@
+*~
+*.mif
+*.nii.gz
+*.nii
+data
+data_acpc

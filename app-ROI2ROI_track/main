@@ -1,0 +1,79 @@
+#!/bin/bash
+
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=00:05:00
+
+##### Initialize data, switches, ROIs and parameters
+
+# Data
+dwi=$(jq -r .dwi config.json)
+gtab=$(jq -r .gtab config.json)
+anat=$(jq -r .anat config.json)
+5tt=$(jq -r .5tt config.json)
+
+# Switches
+do_5tt=$(jq -r .do_5tt config.json)
+
+# ROIs
+start_ROIs=$(jq -r .start_ROIs config.json)
+end_ROIs=$(jq -r .end_ROIs config.json)
+incl_ROIs=$(jq -r .incl_ROIs config.json)
+excl_ROIs=$(jq -r .excl_ROIs config.json)
+
+# Parameters
+response_algorithm=$(jq -r .response_algorithm config.json)
+response_lmax=$(jq -r .response_lmax config.json)
+dwi2fod_algorithm=$(jq -r .dwi2fod_algorithm config.json)
+dwi2fod_lmax_range=$(jq -r .dwi2fod_lmax_range config.json)
+shell=$(jq -r .shell config.json)
+ang=$(jq -r .ang config.json)
+FA=$(jq -r .FAtresh config.json)
+select=$(jq -r .select config.json)
+seed=$(jq -r .seed config.json)
+
+# convert dtiInit output to .mif and double check gradient orientation
+mrconvert ${dwi} -fslgrad ${gtab} dwi_converted.mif
+
+# create mask
+dwi2mask dwi_converted.mif dwi_mask.mif
+
+# estimate SFR for given lmax
+dwi2response ${response_algorithm} dwi_converted.mif dwi_response.txt -shell ${shell} -lmax ${response_lmax} -mask dwi_mask.mif -voxels voxels.mif
+
+# create FODs for given range of lmaxes
+for dwi2fod_lmax in ${dwi2fod_lmax_range}; do
+  dwiextract dwi_converted.mif - | dwi2fod ${dwi2fod_algorithm} - dwi_response.txt -lmax ${dwi2fod_lmax} -mask dwi_mask.mif dwi_FOD_${dwi2fod_lmax}.mif
+done
+
+#
+#
+#
+#
+#
+#
+
+for i in $lmax; do
+  for j in $FAs; do
+    for k in $Curv; do
+      echo $subj\_results_r_r_$i\_$j\_$k
+      tckgen $output/$subj\_acpc_FOD_lmax_$i.mif Tractography_Chiasm_ACT/$subj\_results_r_r_$i\_$j\_$k.tck -select 150 -cutoff $j -angle $k -seed_unidirectional -seed_image $rois/$subj\_sr.mif -include $rois/$subj\_er.mif -act $tt_image -stop -step 0.2 -seeds 1000000 ; 
+      echo $subj\_results_r_l_$i\_$j\_$k
+      tckgen $output/$subj\_acpc_FOD_lmax_$i.mif Tractography_Chiasm_ACT/$subj\_results_r_l_$i\_$j\_$k.tck -select 150 -cutoff $j -angle $k -seed_unidirectional -seed_image $rois/$subj\_sr.mif -include $rois/$subj\_el.mif -act $tt_image -stop -step 0.2 -seeds 1000000 ; 
+      echo $subj\_results_l_r_$i\_$j\_$k
+      tckgen $output/$subj\_acpc_FOD_lmax_$i.mif Tractography_Chiasm_ACT/$subj\_results_l_r_$i\_$j\_$k.tck -select 150 -cutoff $j -angle $k -seed_unidirectional -seed_image $rois/$subj\_sl.mif -include $rois/$subj\_er.mif -act $tt_image -stop -step 0.2 -seeds 1000000 ; 
+      echo $subj\_results_l_l_$i\_$j\_$k
+      tckgen $output/$subj\_acpc_FOD_lmax_$i.mif Tractography_Chiasm_ACT/$subj\_results_l_l_$i\_$j\_$k.tck -select 150 -cutoff $j -angle $k -seed_unidirectional -seed_image $rois/$subj\_sl.mif -include $rois/$subj\_el.mif -act $tt_image -stop -step 0.2 -seeds 1000000 ; 
+    done
+  done
+done
+
+
+
+cd $output/Tractography_Chiasm_ACT
+
+tckedit *_??.tck $subj\_ACT.tck
+tckedit *r_r*_??.tck $subj\_r_r_ACT.tck
+tckedit *r_l*_??.tck $subj\_r_l_ACT.tck
+tckedit *l_r*_??.tck $subj\_l_r_ACT.tck
+tckedit *l_l*_??.tck $subj\_l_l_ACT.tck
+

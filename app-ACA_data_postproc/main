@@ -1,0 +1,27 @@
+#!/bin/bash
+
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=00:05:00
+
+# Data
+dwi=$(jq -r .dwi config.json)
+gtab=$(jq -r .gtab config.json)
+
+# Switches
+response_algorithm=$(jq -r .response_algorithm config.json)
+response_lmax=$(jq -r .response_lmax config.json)
+dwi2fod_algorithm=$(jq -r .dwi2fod_algorithm config.json)
+dwi2fod_lmax_range=$(jq -r .dwi2fod_lmax_range config.json)
+shell=$(jq -r .shell config.json)
+
+# Requires incorporation of ACPC and dtiInit results
+
+mrconvert ${dwi} -fslgrad ${gtab} dwi_converted.mif
+
+dwi2mask dwi_converted.mif dwi_mask.mif
+
+dwi2response ${response_algorithm} dwi_converted.mif dwi_response.txt -shell ${shell} -lmax ${response_lmax} -mask dwi_mask.mif -voxels voxels.mif
+
+for dwi2fod_lmax in ${dwi2fod_lmax_range}; do
+  dwiextract dwi_converted.mif - | dwi2fod ${dwi2fod_algorithm} - dwi_response.txt -lmax ${dwi2fod_lmax} -mask dwi_mask.mif dwi_FOD_${dwi2fod_lmax}.mif
+done

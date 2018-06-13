@@ -1,0 +1,15 @@
+This service performs tracking between ROIs using MRtrix 3.0 functions. Tracking is based on CSD model and supports Ensemble Tractography.
+
+Input:
+1) ODF file(s) obtained by preproc>dtiInit>ODFs
+2) coregisterred anatomy
+3) 5TT image obtained from anatomy
+4) Set of starting ROIs
+5) Set of ending ROIs
+6) Set of inclusion ROIs
+7) Set of exclsion ROIs
+8) Set of parameters
+
+Output:
+a) Separate bundles with common ROIs criteria
+b) One joint fibre bundle
