@@ -1,12 +1,31 @@
 #!/bin/bash
 
-## Performs preprocessing steps, as recommended by MRtrix developers, up to eddy current correction step (but without it - this is handled by another script)
-## Input: 	raw dwi image in mrtrix format (.mif)
-## Output: 	separate dwi images ready to be fed to eddy + name of output dwi images
+## This script is run when several, but not all, volumes in series were acquired with different PE directions. The script extracts given volumes and creates a file with corresponding pair(s), which will be fed to eddy tool during distortion correction step.
 
-preeddy_preproc () {
+# version 1 - 1 input
+
+# version 2 - 2 inputs
+
+
+create_pairs () {
 
 ## function input
+local dwi_one=$1
+local dwi_bvecs_one=$2
+local dwi_bvecs_two=$3
+
+## preprocessing of dwi_one - done
+
+# now either extract what is required
+
+# or preproc 2nd series, merge and afterward extract
+
+# basing on option 1 or 2 create final file and extract b0 from this
+
+
+if [$4 -z]
+
+
 local raw=${1::-4} 
 local __resultvar=${2}
 
@@ -71,5 +90,4 @@ rm tmp -r
 }
 
 preeddy_preproc ce04_raw.mif result ; echo ${result}
-
 
