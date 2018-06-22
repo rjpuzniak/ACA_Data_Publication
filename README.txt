@@ -1,10 +1,22 @@
 Scripts
------------------------------------------------------------------------------------------------
-DONE
+
+
+----------------------------------------------------------------------------------------------
+REGISTERED AND WORKING
+
+----------------------------------------------------------------------------------------------
+TESTING
 
 mrtrix_preproc_fix
 
 	- modification of existing mrtrix_preproc enabling to use images with opposing PE directions for eddy_correction
+
+app-mrtrix3-preproc
+
+	- RPE pairs fix: allows input of one or two images and allows choice of b-value for b0 shell
+
+-----------------------------------------------------------------------------------------------
+WRITTEN
 
 app-5ttgen
 
@@ -30,12 +42,14 @@ app-ROI2ROI_count
 
 	- new script
 	- segments fibers in given bundle using ROIs exlusion/inclusion
+
+app-ACA_results
+
+app-chiasm-connectivity
+
+	- accepts counting resu
 -----------------------------------------------------------------------------------------------
-TO BE DONE
-  
-Results_presentation
-  - outputs counts, graphs and tracts profile for given set of 
-  
+
 
 
 
