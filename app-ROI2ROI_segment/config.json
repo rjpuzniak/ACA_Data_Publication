@@ -1,0 +1,8 @@
+{
+"fibers": "data/ce04_ACT",
+
+"sr_roi": "data/ce04_sr",
+"er_roi": "data/ce04_er",
+"sl_roi": "data/ce04_sl",
+"el_roi": "data/ce04_el"
+}
