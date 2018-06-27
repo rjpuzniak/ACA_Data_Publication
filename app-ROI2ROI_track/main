@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ## define number of threads to use
-NCORE=8
+NCORE=12
 
 ##
 ## parse inputs
@@ -12,7 +12,7 @@ DIFF=`jq -r '.diff' config.json`
 BVAL=`jq -r '.bval' config.json`
 BVEC=`jq -r '.bvec' config.json`
 ANAT=`jq -r '.anat' config.json`
-FIVETT=`jq -r '.5tt' config.json` # optional
+FIVETT=`jq -r '.fivett' config.json` # optional
 
 ## additional options
 B0=`jq -r '.b0' config.json`
@@ -76,11 +76,6 @@ anat=t1
 echo "Converting raw data into MRTrix3 format..."
 mrconvert -fslgrad $BVEC $BVAL $DIFF ${difm}.mif --export_grad_mrtrix ${difm}.b -nthreads $NCORE -quiet
 
-## check and correct gradient orientation and create corrected image
-dwigradcheck ${difm}.mif -grad ${difm}.b -mask ${mask}.mif -export_grad_mrtrix corr.b -force -tempdir ./tmp -nthreads $NCORE -quiet
-mrconvert ${difm}.mif -grad corr.b ${difm}_oriented.mif -nthreads $NCORE -quiet
-difm=${difm}_oriented
-
 ## create mask of dwi data
 dwi2mask ${difm}.mif ${mask}.mif -nthreads $NCORE -quiet
 
@@ -88,10 +83,10 @@ dwi2mask ${difm}.mif ${mask}.mif -nthreads $NCORE -quiet
 mrconvert $ANAT ${anat}.mif -nthreads $NCORE -quiet
 
 ## create b0 - accepting non-zero b0 if provided by user
-if [ $B0 == 0]; then
+if [ $B0 -eq 0 ]; then
 	dwiextract ${difm}.mif - -bzero -nthreads $NCORE -quiet | mrmath - mean b0.mif -axis 3 -nthreads $NCORE -quiet
 else
-	dwiextract ${difm}.mif -shells 0,$B0 -nthreads $NCORE -quiet | mrmath - mean b0.mif -axis -nthreads $NCORE -quiet
+	dwiextract ${difm}.mif -shell 0,$B0 -nthreads $NCORE -quiet | mrmath - mean b0.mif -axis -nthreads $NCORE -quiet
 fi
 
 ## check if b0 volume successfully created
@@ -159,7 +154,7 @@ fi
 ## setting up FOD lmax, one or more values expected
 
 ## if input $FOD_LMAX is empty, set to $MAXLMAX
-if [ -z $FOD_LMAX ]; then
+if [ -z "$FOD_LMAX" ]; then
     echo "No Fiber Orientation Distribution (FOD) Lmax values requested."
     echo "Using the maximum FOD Lmax of $MAXLMAX by default."
     FOD_LMAX=$MAXLMAX
@@ -192,28 +187,26 @@ if [ $MMAXS -gt $MAXLMAX ]; then
 
 fi
 
-	if [[ $FOD_LMAX == 'true' && $NMAX -eq 1 ]]; then
-	## create the list of the ensemble lmax values
+if [[ $FOD_LMAX == 'true' && $NMAX -eq 1 ]]; then
+## create the list of the ensemble lmax values
 	    
-	    ## create array of lmaxs to use
-	    emax=0
-	    LMAXS=''
+    ## create array of lmaxs to use
+    emax=0
+    LMAXS=''
 	
-	    ## while less than the max requested
-	    while [ $emax -lt $MMAXS ]; do
+    ## while less than the max requested
+    while [ $emax -lt $MMAXS ]; do
 
-		## iterate
-		emax=$(($emax+2))
-		LMAXS=`echo -n $LMAXS; echo -n ' '; echo -n $emax`
+	## iterate
+	emax=$(($emax+2))
+	LMAXS=`echo -n $LMAXS; echo -n ' '; echo -n $emax`
 
-	    done
+    done
 
-	fi
+    else
 
-else
-
-## or just pass the list on
-LMAXS=$FOD_LMAX
+    ## or just pass the list on
+    LMAXS=$FOD_LMAX
 
 fi
 
@@ -245,7 +238,11 @@ if [ $DO_PRB2 == "true" ]; then
     for lmax in $LMAXS; do
 	for curv in $CURVS; do
 	    for fa in $FA; do
-	       TOTAL=$(($TOTAL+$NUM_FIBERS))
+		for sroi in $START_ROIs; do
+			for eroi in $END_ROIs; do
+	       		TOTAL=$(($TOTAL+$NUM_FIBERS))
+			done
+		done
 	    done
        done
     done
@@ -351,7 +348,7 @@ fi
 tensor2metric -mask ${mask}.mif -adc md.mif -fa fa.mif -ad ad.mif -rd rd.mif -cl cl.mif -cp cp.mif -cs cs.mif dt.mif -nthreads $NCORE -quiet
 
 ## if not provided, create 5-Tissue-Type tracking mask
-if [-z $FIVETT]; then
+if [ -z $FIVETT ]; then
 
 	echo "Creating 5-Tissue-Type (5TT) tracking mask..."
 	## convert anatomy 
@@ -359,10 +356,10 @@ if [-z $FIVETT]; then
 	FIVETT=5tt	
 fi
 	## generate gm-wm interface seed mask
-	5tt2gmwmi ${FIVETT}.mif gmwmi_seed.mif -nthreads $NCORE -quiet
+	5tt2gmwmi ${FIVETT}.nii.gz gmwmi_seed.mif -nthreads $NCORE -quiet
 
 	## create visualization output
-	5tt2vis ${FIVETT}.mif ${FIVETT}vis.mif -nthreads $NCORE -quiet
+	5tt2vis ${FIVETT}.nii.gz ${FIVETT}vis.mif -nthreads $NCORE -quiet
 
 
 
@@ -384,7 +381,7 @@ if [ $MS -eq 0 ]; then
     for lmax in $LMAXS; do
 
 	echo "Fitting CSD FOD of Lmax ${lmax}..."
-	dwi2fod $FOD_ALG -mask ${mask}.mif csd ${difm}.mif response.txt csd_lmax${lmax}.mif -lmax $lmax -nthreads $NCORE -quiet
+	dwi2fod $FOD_ALG -mask ${mask}.mif ${difm}.mif response.txt csd_lmax${lmax}.mif -lmax $lmax -shell 1600 -nthreads $NCORE -quiet
 
 	## intensity normalization of CSD fit
 	# if [ $NORM == 'true' ]; then
@@ -452,18 +449,6 @@ for i in ${EXCL_ROI}; do
 	excluding+=-exclude" "$i" ";
 done
 
-## create all possible combinations of start and end
-
-for lmax in ${LMAXS}; do
-	for starting in ${START_ROI}; do
-		for ending in ${END_ROI}; do
-			# end for each combination invoke a comand
-			echo tckgen FOD output -seed $starting -include $ending $including $excluding $parameters 
-		done
-	done
-done
-
-
 echo "Performing Anatomically Constrained Tractography (ACT)..."
 
 if [ $DO_PRB2 == "true" ]; then
@@ -487,18 +472,18 @@ if [ $DO_PRB2 == "true" ]; then
 
 	    for cutoff in $FA; do
 
-		for starting in ${START_ROI}; do
+		for starting in ${START_ROIs}; do
 
-			for ending in ${END_ROI}; do
+			for ending in ${END_ROIs}; do
 
-			    echo "Tracking iFOD2 streamlines at Lmax ${lmax} with a maximum curvature of ${curv} degrees and FA cut-off value of ${cutoff} for seed ROI and target ROI..."
+			    echo "Tracking iFOD2 streamlines at Lmax ${lmax} with a maximum curvature of ${curv} degrees and FA cut-off value of ${cutoff} for seed ROI ${starting} and target ROI ${ending}..."
 
-			   tckgen $fod -algorithm iFOD2 act ${FIVETT}.mif \
-					 -select $NUM_FIBERS -seed $SEED \
-					 -angle $curv -cutoff $FA -step $STEP -minlength $MIN_LENGTH -maxlength $MAXLENGTH \
-					 -seed_image $starting -include $ending $including $excluding \
-					 -backtrack -nthreads $NCORE -quiet \
-					 wb_iFOD2_lmax${lmax}\_curv${curv}\_cutoff${cutoff}\_start${starting}\_end${ending}.tck
+			
+echo tckgen $fod -algorithm iFOD2 -act ${FIVETT}.nii.gz -backtrack -select $NUM_FIBERS -seeds $SEED -angle $curv -cutoff $FA -step $STEP -minlength $MIN_LENGTH -maxlength $MAX_LENGTH wb_iFOD2_lmax${lmax}\_curv${curv}\_cutoff${cutoff}\_start${starting::-4}\_end${ending::-4}.tck -seed_image $starting -include $ending $including $excluding -nthreads $NCORE  -quiet
+
+				tckgen $fod -algorithm iFOD2 -act ${FIVETT}.nii.gz -backtrack -select $NUM_FIBERS -seeds $SEED -angle $curv -cutoff $FA -step $STEP -minlength $MIN_LENGTH -maxlength $MAX_LENGTH wb_iFOD2_lmax${lmax}\_curv${curv}\_cutoff${cutoff}\_start${starting::-4}\_end${ending::-4}.tck -seed_image $starting -include $ending $including $excluding -nthreads $NCORE  -quiet
+
+
 			
 			done
 		done
@@ -642,7 +627,7 @@ COUNT=`tckinfo track.tck | grep -w 'count' | awk '{print $2}'`
 echo "Ensemble tractography generated $COUNT of a requested $TOTAL"
 
 ## if count is wrong, say so / fail / clean for fast re-tracking
-if [ $COUNT -ne $TOTAL ]; then
+if [ ! $COUNT -eq $TOTAL ]; then
     echo "Incorrect count. Tractography failed."
     #rm -f wb*.tck
     #rm -f track.tck
