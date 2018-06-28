@@ -1,11 +1,28 @@
 {
-"fibers": "data/ce04_ACT",
+"fibers": "data/one data/two data/three data/four",
+"fiberstwo": "data/ce04_ACT",
 
-"do_oc": "true",
+"do_merge": "false",
+"do_oc": "false",
+"do_edit": "true",
+
 "dil": "1",
-
 "sr_roi": "data/ce04_sr",
 "er_roi": "data/ce04_er",
 "sl_roi": "data/ce04_sl",
-"el_roi": "data/ce04_el"
+"el_roi": "data/ce04_el",
+
+"incl_roi": "data/ce04_er data/ce04_sr" ,
+"excl_roi": "data/ce04_sl",
+"mask": "",
+
+"max_length": "100",
+"min_length": "100",
+
+"number": "59",
+"skip": "19",
+
+"inverse": "true",
+"ends_only": "true"
+
 }
