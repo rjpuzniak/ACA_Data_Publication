@@ -1,6 +1,5 @@
 FROM brainlife/fsl:5.0.9 
 
-BASED ON CODE OF Brent McPherson <bcmcpher@iu.edu> 
 MAINTAINER Robert Puzniak <robert.puzniak@med.ovgu.de>
 
 RUN apt-get update

@@ -117,8 +117,6 @@ else
 		command+=-ends_only" ";
 	fi
 
-
-	## and run it
 	tckedit ${FIBERS} $inclusion $exclusion $mask $command edited_output.tck
 
 fi
