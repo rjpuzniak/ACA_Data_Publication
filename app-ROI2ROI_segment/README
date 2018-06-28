@@ -1,8 +1,10 @@
-Script extracting subgroups of fibers from single fiber bundle. Extraction can be based on ROIs, streamline length or streamline weights criteria.
-A separate option allows analysis as in ACA data set.
+App-ROI2ROI_segment accepts any number of .tck files and:
+(1) merges all of input files into single file
+(2) segments input tracks into crossing and non-crossing tracts as in OC
+(3) segments all input tracks according to user-defined conditions (streamlines length, inclusion/exlusion ROIs, etc.) and outputs single file containing all streamlines fulfilling criteria
 
 Input: 	fiber bundle to be segmented
-		segmentation parameters (ROIs / values)
+		segmentation parameters (ROIs and/or values)
 
-Output:	separate fibre bundles fulfilling defined criteria 
-		
+Output:	fibre bundles fulfilling defined criteria 
+		* in case of (2) app outputs 4 files with streamlines and a product.json file containing streamline count for each group
