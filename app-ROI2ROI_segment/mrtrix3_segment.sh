@@ -8,29 +8,38 @@ FIBERS=`jq -r .fibers config.json`
 
 ## switch for OC tracts analysis and corresponding ROIs
 DO_OC=`jq -r .do_oc config.json`
-SR_ROI=`jq -r .sr_roi config.json`
-SL_ROI=`jq -r .sl_roi config.json`
-ER_ROI=`jq -r .er_roi config.json`
-EL_ROI=`jq -r .el_roi config.json`
 
-## segmentation ROIs
+if [ $DO_OC == true ]; then
 
-## segmentation parameters
+	## segmentation ROIs
+	SR_ROI=`jq -r .sr_roi config.json`
+	SL_ROI=`jq -r .sl_roi config.json`
+	ER_ROI=`jq -r .er_roi config.json`
+	EL_ROI=`jq -r .el_roi config.json`
 
-## segment streamlines using dilated starting and ending ROIs
+	## optional dilation of seed and target ROIs
+	DIL=`jq -r .dil config.json`
 
-tckedit ${FIBERS}.tck -include $(maskfilter ${SR_ROI}.mif dilate -npass 1 - -quiet) -include $(maskfilter ${ER_ROI}.mif dilate -npass 1 - -quiet) SR_2_ER.tck
-tckedit ${FIBERS}.tck -include $(maskfilter ${SR_ROI}.mif dilate -npass 1 - -quiet) -include $(maskfilter ${EL_ROI}.mif dilate -npass 1 - -quiet) SR_2_EL.tck
-tckedit ${FIBERS}.tck -include $(maskfilter ${SL_ROI}.mif dilate -npass 1 - -quiet) -include $(maskfilter ${ER_ROI}.mif dilate -npass 1 - -quiet) SL_2_ER.tck
-tckedit ${FIBERS}.tck -include $(maskfilter ${SL_ROI}.mif dilate -npass 1 - -quiet) -include $(maskfilter ${EL_ROI}.mif dilate -npass 1 - -quiet) SL_2_EL.tck
+	## segment streamlines using dilated starting and ending ROIs
 
-## count streamlines and save numbers to the file
-touch OC_count.txt
+	tckedit ${FIBERS}.tck -include $(maskfilter ${SR_ROI}.mif dilate -npass $DIL - -quiet) -include $(maskfilter ${ER_ROI}.mif dilate -npass $DIL - -quiet) SR_2_ER.tck
+	tckedit ${FIBERS}.tck -include $(maskfilter ${SR_ROI}.mif dilate -npass $DIL - -quiet) -include $(maskfilter ${EL_ROI}.mif dilate -npass $DIL - -quiet) SR_2_EL.tck
+	tckedit ${FIBERS}.tck -include $(maskfilter ${SL_ROI}.mif dilate -npass $DIL - -quiet) -include $(maskfilter ${ER_ROI}.mif dilate -npass $DIL - -quiet) SL_2_ER.tck
+	tckedit ${FIBERS}.tck -include $(maskfilter ${SL_ROI}.mif dilate -npass $DIL - -quiet) -include $(maskfilter ${EL_ROI}.mif dilate -npass $DIL - -quiet) SL_2_EL.tck
 
-echo -n right_to_right:" " >> OC_count.txt ; echo $(tckstats -output count SR_2_ER.tck -quiet) >> OC_count.txt
-echo -n right_to_left:" " >> OC_count.txt ; echo $(tckstats -output count SR_2_EL.tck -quiet) >> OC_count.txt
-echo -n left_to_right:" " >> OC_count.txt ; echo $(tckstats -output count SL_2_ER.tck -quiet) >> OC_count.txt
-echo -n left_to_left:" " >> OC_count.txt ; echo $(tckstats -output count SL_2_EL.tck -quiet) >> OC_count.txt
+	## count streamlines and save numbers to the product.json file
+	
+	touch product.json
+	
+	echo "{" >> product.json
+	
+	echo -n \"right_to_right\":" " >> product.json ; echo \"$(tckstats -output count SR_2_ER.tck -quiet)\"\, >> product.json
+	echo -n \"right_to_left\":" " >> product.json ; echo \"$(tckstats -output count SR_2_EL.tck -quiet)\"\, >> product.json
+	echo -n \"left_to_right\":" " >> product.json ; echo \"$(tckstats -output count SL_2_ER.tck -quiet)\"\, >> product.json
+	echo -n \"left_to_left\":" " >> product.json ; echo \"$(tckstats -output count SL_2_EL.tck -quiet)\" >> product.json
+	echo "}" >> product.json
+
+fi
 
 
 : <<'END'

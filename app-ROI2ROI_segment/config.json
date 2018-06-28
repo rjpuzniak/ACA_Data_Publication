@@ -1,6 +1,9 @@
 {
 "fibers": "data/ce04_ACT",
 
+"do_oc": "true",
+"dil": "1",
+
 "sr_roi": "data/ce04_sr",
 "er_roi": "data/ce04_er",
 "sl_roi": "data/ce04_sl",
