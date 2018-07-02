@@ -1,4 +1,4 @@
-App-ROI2ROI_segment accepts any number of .tck files and:
+App-segment_tracks accepts any number of .tck files and:
 (1) merges all of input files into single file
 (2) segments input tracks into crossing and non-crossing tracts as in OC
 (3) segments all input tracks according to user-defined conditions (streamlines length, inclusion/exlusion ROIs, etc.) and outputs single file containing all streamlines fulfilling criteria
