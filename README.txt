@@ -1,55 +1,12 @@
-Scripts
+Scripts used @ OVGU for preprocessing and analysis of ACA (albinism, control, achiasma) data set.
 
 
-----------------------------------------------------------------------------------------------
-REGISTERED AND WORKING
+app-ROI2ROI_track fits CSD model to input DWI data and performs tracking based on ROIs provided by user. Tracking is employing following tools and methods: Anatomically Constrained Tractography (ACT), Ensemble Tractography (ET) and iFOD2 tracking algorithm. Although script was designed primarily to perform optimal tracking in Optic Chiasm, the script can be used for any set of starting/ending/exclusion/inclusion ROIs.
 
-----------------------------------------------------------------------------------------------
-TESTING
+app-segment-track accepts a single file containing streamlines and segments them basing on user-provided parameters and/or ROIs
 
-mrtrix_preproc_fix
+app-ROI2ROI_count_and_present is an app providing visualisation of results of ACA data set analysis
 
-	- modification of existing mrtrix_preproc enabling to use images with opposing PE directions for eddy_correction
+irrelevant/ contains outdated/not working/trash code
 
-app-mrtrix3-preproc
-
-	- RPE pairs fix: allows input of one or two images and allows choice of b-value for b0 shell
-
------------------------------------------------------------------------------------------------
-WRITTEN
-
-app-5ttgen
-
-	- wrapper for 5ttgen script from mrtrix, uses either FSL or FREESURFER
-	
-app-ACA_data_postproc*
-
-	- input: data run through mrtrix_preproc and dtiInit
-	- output: files required for tracking with ROI2ROI_tracking script
-
-* to be merged with app-ROI2ROI_track
------------------------------------------------------------------------------------------------
-IN PROGRESS
-
-app-ROI2ROI_track
-
-	- fix to already existing mrtrix ACT tracking
-	- will merge app-ACA_data_postprocc with already existing tracking and add it as a fix to app already registered on BL
-	- combines postproc and tracking
-	- introduces wider choice of parameters and using ROIs in tracking
-
-app-ROI2ROI_count
-
-	- new script
-	- segments fibers in given bundle using ROIs exlusion/inclusion
-
-app-ACA_results
-
-app-chiasm-connectivity
-
-	- accepts counting resu
------------------------------------------------------------------------------------------------
-
-
-
-
+slightly_irrelevant/ contains working code already incorporated in BL from different repos
